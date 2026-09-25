@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Quran World</title>
+<style>
+  :root {
+    --primary: #0288D1;
+    --primary-light: #4FC3F7;
+    --primary-dark: #01579B;
+    --bg: #F5FBFF;
+    --white: #FFFFFF;
+    --text: #1A237E;
+    --green: #2E7D32;
+    --red: #C62828;
+    --blue: #1565C0;
+    --gold: #C9A227;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    height: 100vh;
+  }
+
+  /* ========== SPLASH ========== */
+  #splash {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0288D1, #4FC3F7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.6s ease, visibility 0.6s;
+  }
+  #splash.hide {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .splash-logo {
+    width: 120px;
+    height: 120px;
+    background: white;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .splash-title {
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
+    margin-top: 24px;
+    letter-spacing: 1px;
+  }
+  .splash-sub {
+    color: rgba(255,255,255,0.9);
+    margin-top: 8px;
+    font-size: 15px;
+  }
+  .loader {
+    width: 40px;
+    height: 4px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    margin-top: 40px;
+    overflow: hidden;
+  }
+  .loader::after {
+    content: '';
+    display: block;
+    width: 40%;
+    height: 100%;
+    background: white;
+    border-radius: 4px;
+    animation: loading 1.2s infinite;
+  }
+  @keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  /* ========== APP CONTAINER ========== */
+  #app {
+    display: none;
+    height: 100vh;
+    flex-direction: column;
+  }
+  #app.show {
+    display: flex;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    color: white;
+    padding: 16px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(2,136,209,0.25);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .header-icons {
+    display: flex;
+    gap: 16px;
+    font-size: 22px;
+  }
+
+  /* Content */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 80px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ========== HOME ========== */
+  .home-section {
+    padding: 16px;
+  }
+  .card {
+    background: var(--white);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 18px rgba(2,136,209,0.08);
+    border: 1px solid rgba(2,136,209,0.08);
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .continue-btn {
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(2,136,209,0.3);
+  }
+  .continue-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* QuranEducation Banner */
+  .edu-banner {
+    background: linear-gradient(135deg, #01579B, #0288D1);
+    color: white;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .edu-banner::before {
+    content: '📖';
+    position: absolute;
+    right: -10px;
+    bottom: -20px;
+    font-size: 90px;
+    opacity: 0.15;
+  }
+  .edu-banner h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+  .edu-banner p {
+    font-size: 13px;
+    opacity: 0.95;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .edu-teacher {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .enroll-btn {
+    background: white;
+    color: var(--primary-dark);
+    border: none;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  /* Grid Menu */
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .menu-item {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 18px 10px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(2,136,209,0.08);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid rgba(2,136,209,0.06);
+  }
+  .menu-item:active {
+    transform: scale(0.95);
+    background: #E1F5FE;
+  }
+  .menu-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+  .menu-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ========== BOTTOM NAV ========== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 14px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    z-index: 100;
+    border-top: 1px solid #E3F2FD;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #78909C;
+    cursor: pointer;
+    padding: 4px 12px;
+  }
+  .nav-item.active {
+    color: var(--primary);
+  }
+  .nav-item span {
+    font-size: 22px;
+  }
+
+  /* ========== PAGES ========== */
+  .page {
+    display: none;
+    padding: 16px;
+    animation: fadeIn 0.3s ease;
+  }
+  .page.active {
+    display: block;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Quran Reader */
+  .quran-page {
+    background: #FFFEF7;
+    border-radius: 12px;
+    padding: 24px 18px;
+    min-height: 70vh;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    border: 8px solid #E8F5E9;
+    position: relative;
+    font-family: 'Amiri', 'Traditional Arabic', serif;
+    direction: rtl;
+    text-align: center;
+    line-height: 2.1;
+  }
+  .quran-page::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 2px solid #C8E6C9;
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  .ayah {
+    font-size: 26px;
+    margin: 12px 0;
+    color: #1B5E20;
+  }
+  .ayah .red { color: #C62828; }
+  .ayah .blue { color: #1565C0; }
+  .ayah .green { color: #2E7D32; }
+  .ayah .black { color: #212121; }
+  .page-number {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 13px;
+    color: #78909C;
+    font-family: sans-serif;
+  }
+  .bookmark-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    cursor: pointer;
+  }
+
+  /* List items */
+  .list-item {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    cursor: pointer;
+  }
+  .list-item:active {
+    background: #E3F2FD;
+  }
+  .list-num {
+    width: 36px;
+    height: 36px;
+    background: #E1F5FE;
+    color: var(--primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .list-text {
+    flex: 1;
+  }
+  .list-text h4 {
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+  .list-text p {
+    font-size: 12px;
+    color: #78909C;
+  }
+
+  /* Arabic text blocks */
+  .arabic-block {
+    font-family: 'Amiri', 'Traditional Arabic', serif;
+    font-size: 22px;
+    direction: rtl;
+    text-align: right;
+    line-height: 1.9;
+    color: #1B5E20;
+    background: #F1F8E9;
+    padding: 16px;
+    border-radius: 12px;
+    margin: 10px 0;
+  }
+
+  /* Qibla */
+  .qibla-container {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .compass {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #E3F2FD, #BBDEFB);
+    border: 8px solid var(--primary);
+    margin: 0 auto 24px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 40px rgba(2,136,209,0.25);
+  }
+  .needle {
+    width: 6px;
+    height: 90px;
+    background: linear-gradient(to top, #C62828, #EF5350);
+    position: absolute;
+    top: 20px;
+    border-radius: 4px;
+    transform-origin: bottom center;
+    transition: transform 0.4s ease;
+  }
+  .kaaba {
+    font-size: 36px;
+    z-index: 2;
+  }
+
+  /* Settings */
+  .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #E3F2FD;
+  }
+  .setting-row:last-child {
+    border-bottom: none;
+  }
+  .toggle {
+    width: 48px;
+    height: 28px;
+    background: #B0BEC5;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+  }
+  .toggle.on {
+    background: var(--primary);
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: 0.2s;
+  }
+  .toggle.on::after {
+    left: 23px;
+  }
+
+  /* Utility */
+  .back-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    margin-right: 12px;
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--primary-dark);
+  }
+  .hidden {
+    display: none !important;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">📖</div>
+  <div class="splash-title">Quran World</div>
+  <div class="splash-sub">Learn • Read • Reflect</div>
+  <div class="loader"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Header -->
+  <div class="header" id="mainHeader">
+    <h1 id="headerTitle">Quran World</h1>
+    <div class="header-icons">
+      <span onclick="showPage('search')">🔍</span>
+      <span onclick="showPage('settings')">⚙️</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="content">
+
+    <!-- HOME -->
+    <div class="page active" id="home">
+      <div class="home-section">
+
+        <!-- Continue Reading -->
+        <div class="card">
+          <div class="card-title">📖 Continue Reading</div>
+          <p style="font-size:13px;color:#78909C;margin-bottom:12px;">Surah Al-Baqarah • Page 12</p>
+          <button class="continue-btn" onclick="showPage('quran')">
+            ▶ Resume Reading
+          </button>
+        </div>
+
+        <!-- QuranEducation Banner -->
+        <div class="edu-banner">
+          <h3>📖 QuranEducation</h3>
+          <p>We’re here to help you learn the Quran with proper Tajweed and understanding.</p>
+          <div class="edu-teacher">👨‍🏫 Hafiz Iftikhar — Master in Islamic Studies</div>
+          <button class="enroll-btn" onclick="window.open('tel:+923333334448')">
+            📞 Enroll Now: +92 333 333 4448
+          </button>
+        </div>
+
+        <!-- Daily Hadith -->
+        <div class="card">
+          <div class="card-title">📜 Daily Hadith</div>
+          <p style="font-size:14px;line-height:1.6;direction:rtl;text-align:right;font-family:Amiri,serif;font-size:18px;color:#1B5E20;">
+            إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ
+          </p>
+          <p style="font-size:13px;margin-top:8px;color:#546E7A;">
+            “Actions are according to intentions.” — Sahih Bukhari
+          </p>
+        </div>
+
+        <!-- Daily Dua -->
+        <div class="card">
+          <div class="card-title">🤲 Daily Dua</div>
+          <p style="font-size:18px;direction:rtl;text-align:right;font-family:Amiri,serif;color:#1B5E20;line-height:1.8;">
+            رَبِّ زِدْنِي عِلْمًا
+          </p>
+          <p style="font-size:13px;margin-top:6px;color:#546E7A;">
+            “My Lord, increase me in knowledge.”
+          </p>
+        </div>
+
+        <!-- Menu Grid -->
+        <div class="menu-grid">
+          <div class="menu-item" onclick="showPage('quran')">
+            <div class="menu-icon">📖</div>
+            <div class="menu-label">Quran</div>
+          </div>
+          <div class="menu-item" onclick="showPage('audio')">
+            <div class="menu-icon">🎧</div>
+            <div class="menu-label">Audio</div>
+          </div>
+          <div class="menu-item" onclick="showPage('azkar')">
+            <div class="menu-icon">🌅</div>
+            <div class="menu-label">Azkar</div>
+          </div>
+          <div class="menu-item" onclick="showPage('kalmas')">
+            <div class="menu-icon">📿</div>
+            <div class="menu-label">Kalmas</div>
+          </div>
+          <div class="menu-item" onclick="showPage('hadith')">
+            <div class="menu-icon">📜</div>
+            <div class="menu-label">Hadith</div>
+          </div>
+          <div class="menu-item" onclick="showPage('qibla')">
+            <div class="menu-icon">🧭</div>
+            <div class="menu-label">Qibla</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QURAN -->
+    <div class="page" id="quran">
+      <div class="section-title">Complete Holy Quran</div>
+      <div class="list-item" onclick="openReader(1)">
+        <div class="list-num">1</div>
+        <div class="list-text">
+          <h4>الفاتحة</h4>
+          <p>Al-Fatihah • 7 Ayahs</p>
+        </div>
+      </div>
+      <div class="list-item" onclick="openReader(2)">
+        <div class="list-num">2</div>
+        <div class="list-text">
+          <h4>البقرة</h4>
+          <p>Al-Baqarah • 286 Ayahs</p>
+        </div>
+      </div>
+      <div class="list-item" onclick="openReader(3)">
+        <div class="list-num">3</div>
+        <div class="list-text">
+          <h4>آل عمران</h4>
+          <p>Aal-e-Imran • 200 Ayahs</p>
+        </div>
+      </div>
+      <div class="list-item" onclick="openReader(36)">
+        <div class="list-num">36</div>
+        <div class="list-text">
+          <h4>يس</h4>
+          <p>Ya-Sin • 83 Ayahs</p>
+        </div>
+      </div>
+      <div class="list-item" onclick="openReader(55)">
+        <div class="list-num">55</div>
+        <div class="list-text">
+          <h4>الرحمن</h4>
+          <p>Ar-Rahman • 78 Ayahs</p>
+        </div>
+      </div>
+      <div class="list-item" onclick="openReader(67)">
+        <div class="list-num">67</div>
+        <div class="list-text">
+          <h4>الملك</h4>
+          <p>Al-Mulk • 30 Ayahs</p>
+        </div>
+      </div>
+      <p style="text-align:center;color:#78909C;margin-top:20px;font-size:13px;">
+        114 Surahs • 30 Paras • Colour-coded Tajweed
+      </p>
+    </div>
+
+    <!-- QURAN READER -->
+    <div class="page" id="reader">
+      <div class="quran-page">
+        <button class="bookmark-btn" onclick="toggleBookmark()">✏️</button>
+        <div class="ayah">
+          <span class="black">بِسْمِ ٱللَّهِ</span>
+          <span class="red"> ٱلرَّحْمَـٰنِ</span>
+          <span class="blue"> ٱلرَّحِيمِ</span>
+        </div>
+        <div class="ayah">
+          <span class="green">ٱلْحَمْدُ</span>
+          <span class="black"> لِلَّهِ</span>
+          <span class="red"> رَبِّ</span>
+          <span class="blue"> ٱلْعَـٰلَمِينَ</span>
+        </div>
+        <div class="ayah">
+          <span class="black">ٱلرَّحْمَـٰنِ</span>
+          <span class="green"> ٱلرَّحِيمِ</span>
+        </div>
+        <div class="ayah">
+          <span class="blue">مَـٰلِكِ</span>
+          <span class="red"> يَوْمِ</span>
+          <span class="black"> ٱلدِّينِ</span>
+        </div>
+        <div class="ayah">
+          <span class="green">إِيَّاكَ</span>
+          <span class="black"> نَعْبُدُ</span>
+          <span class="red"> وَإِيَّاكَ</span>
+          <span class="blue"> نَسْتَعِينُ</span>
+        </div>
+        <div class="page-number">Page 1 • Surah Al-Fatihah</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:16px;">
+        <button class="continue-btn" style="flex:1;background:#78909C;" onclick="showPage('quran')">← Back</button>
+        <button class="continue-btn" style="flex:1;" onclick="alert('Next page (demo)')">Next →</button>
+      </div>
+    </div>
+
+    <!-- AUDIO -->
+    <div class="page" id="audio">
+      <div class="section-title">Audio Quran</div>
+      <div class="list-item">
+        <div class="list-num">🎧</div>
+        <div class="list-text">
+          <h4>Mishary Rashid Alafasy</h4>
+          <p>Play • Pause • Download</p>
+        </div>
+      </div>
+      <div class="list-item">
+        <div class="list-num">🎧</div>
+        <div class="list-text">
+          <h4>Abdul Rahman Al-Sudais</h4>
+          <p>Play • Pause • Download</p>
+        </div>
+      </div>
+      <div class="list-item">
+        <div class="list-num">🎧</div>
+        <div class="list-text">
+          <h4>Saad Al-Ghamdi</h4>
+          <p>Play • Pause • Download</p>
+        </div>
+      </div>
+      <div class="list-item">
+        <div class="list-num">🎧</div>
+        <div class="list-text">
+          <h4>Maher Al-Muaiqly</h4>
+          <p>Play • Pause • Download</p>
+        </div>
+      </div>
+      <p style="text-align:center;color:#78909C;margin-top:20px;font-size:13px;">
+        Background audio supported (demo)
+      </p>
+    </div>
+
+    <!-- AZKAR -->
+    <div class="page" id="azkar">
+      <div class="section-title">Morning & Evening Azkar</div>
+      <div class="card">
+        <h4 style="margin-bottom:10px;">🌅 Morning Azkar</h4>
+        <div class="arabic-block">
+          أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ
+        </div>
+        <p style="font-size:13px;color:#546E7A;">We have entered the morning and the dominion belongs to Allah...</p>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:10px;">🌙 Evening Azkar</h4>
+        <div class="arabic-block">
+          أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ
+        </div>
+        <p style="font-size:13px;color:#546E7A;">We have entered the evening and the dominion belongs to Allah...</p>
+      </div>
+    </div>
+
+    <!-- KALMAS -->
+    <div class="page" id="kalmas">
+      <div class="section-title">Six Kalmas</div>
+      <div class="card">
+        <h4>1. Kalimah Tayyibah</h4>
+        <div class="arabic-block">لَا إِلَٰهَ إِلَّا ٱللَّهُ مُحَمَّدٌ رَّسُولُ ٱللَّهِ</div>
+      </div>
+      <div class="card">
+        <h4>2. Kalimah Shahadah</h4>
+        <div class="arabic-block">أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا ٱللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ</div>
+      </div>
+      <div class="card">
+        <h4>3. Kalimah Tamjeed</h4>
+        <div class="arabic-block">سُبْحَانَ ٱللَّهِ وَالْحَمْدُ لِلَّهِ وَلَا إِلَٰهَ إِلَّا ٱللَّهُ وَٱللَّهُ أَكْبَرُ</div>
+      </div>
+      <div class="card">
+        <h4>4. Kalimah Tawheed</h4>
+        <div class="arabic-block">لَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ...</div>
+      </div>
+      <div class="card">
+        <h4>5. Kalimah Istighfar</h4>
+        <div class="arabic-block">أَسْتَغْفِرُ ٱللَّهَ رَبِّي مِنْ كُلِّ ذَنْبٍ...</div>
+      </div>
+      <div class="card">
+        <h4>6. Kalimah Radd-e-Kufr</h4>
+        <div class="arabic-block">ٱللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ أَنْ أُشْرِكَ بِكَ شَيْئًا...</div>
+      </div>
+    </div>
+
+    <!-- HADITH -->
+    <div class="page" id="hadith">
+      <div class="section-title">Hadith Collection (500+)</div>
+      <div class="card">
+        <div class="arabic-block" style="font-size:18px;">إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ</div>
+        <p style="font-size:13px;margin-top:8px;">“Actions are according to intentions...”</p>
+        <p style="font-size:12px;color:#78909C;margin-top:6px;">Source: Sahih Bukhari</p>
+      </div>
+      <div class="card">
+        <div class="arabic-block" style="font-size:18px;">مَنْ حَسُنَ إِسْلَامُ الْمَرْءِ تَرْكُهُ مَا لَا يَعْنِيهِ</div>
+        <p style="font-size:13px;margin-top:8px;">“Part of a person’s good Islam is leaving what does not concern him.”</p>
+        <p style="font-size:12px;color:#78909C;margin-top:6px;">Source: Tirmidhi</p>
+      </div>
+      <div class="card">
+        <div class="arabic-block" style="font-size:18px;">الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ</div>
+        <p style="font-size:13px;margin-top:8px;">“A Muslim is the one from whose tongue and hand the Muslims are safe.”</p>
+        <p style="font-size:12px;color:#78909C;margin-top:6px;">Source: Sahih Bukhari</p>
+      </div>
+    </div>
+
+    <!-- QIBLA -->
+    <div class="page" id="qibla">
+      <div class="qibla-container">
+        <div class="section-title">Qibla Compass</div>
+        <div class="compass">
+          <div class="needle" id="needle"></div>
+          <div class="kaaba">🕋</div>
+        </div>
+        <p style="font-size:16px;font-weight:600;color:var(--primary-dark);">Direction to Kaaba</p>
+        <p style="font-size:13px;color:#78909C;margin-top:8px;">Real-time compass (demo – enable location & sensors on real device)</p>
+        <button class="continue-btn" style="margin-top:24px;max-width:240px;" onclick="simulateQibla()">
+          🔄 Recalibrate
+        </button>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="settings">
+      <div class="section-title">Settings</div>
+      <div class="card">
+        <div class="setting-row">
+          <span>Font Size</span>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button onclick="changeFont(-2)" style="width:32px;height:32px;border-radius:8px;border:1px solid #B0BEC5;background:white;">A-</button>
+            <span id="fontSizeLabel">16</span>
+            <button onclick="changeFont(2)" style="width:32px;height:32px;border-radius:8px;border:1px solid #B0BEC5;background:white;">A+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span>Dark Mode</span>
+          <div class="toggle" id="darkToggle" onclick="toggleDark()"></div>
+        </div>
+        <div class="setting-row">
+          <span>Notifications</span>
+          <div class="toggle on" id="notifToggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <span>Auto Save Progress</span>
+          <div class="toggle on"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="showPage('home')">
+      <span>🏠</span>
+      Home
+    </div>
+    <div class="nav-item" onclick="showPage('quran')">
+      <span>📖</span>
+      Quran
+    </div>
+    <div class="nav-item" onclick="showPage('audio')">
+      <span>🎧</span>
+      Audio
+    </div>
+    <div class="nav-item" onclick="showPage('qibla')">
+      <span>🧭</span>
+      Qibla
+    </div>
+    <div class="nav-item" onclick="showPage('settings')">
+      <span>⚙️</span>
+      Settings
+    </div>
+  </div>
+</div>
+
+<script>
+  // Splash
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    document.getElementById('app').classList.add('show');
+  }, 2200);
+
+  // Navigation
+  function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+
+    // Update bottom nav
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const map = { home: 0, quran: 1, audio: 2, qibla: 3, settings: 4 };
+    if (map[pageId] !== undefined) {
+      document.querySelectorAll('.nav-item')[map[pageId]].classList.add('active');
+    }
+
+    // Header title
+    const titles = {
+      home: 'Quran World',
+      quran: 'Holy Quran',
+      reader: 'Reading',
+      audio: 'Audio Quran',
+      azkar: 'Azkar',
+      kalmas: 'Kalmas',
+      hadith: 'Hadith',
+      qibla: 'Qibla',
+      settings: 'Settings'
+    };
+    document.getElementById('headerTitle').textContent = titles[pageId] || 'Quran World';
+
+    window.scrollTo(0, 0);
+  }
+
+  function openReader(surah) {
+    showPage('reader');
+  }
+
+  function toggleBookmark() {
+    alert('Bookmark saved! (demo)');
+  }
+
+  // Qibla demo
+  function simulateQibla() {
+    const needle = document.getElementById('needle');
+    const angle = Math.floor(Math.random() * 360);
+    needle.style.transform = `rotate(${angle}deg)`;
+  }
+  setInterval(simulateQibla, 3000);
+
+  // Font size
+  let fontSize = 16;
+  function changeFont(delta) {
+    fontSize = Math.max(12, Math.min(28, fontSize + delta));
+    document.getElementById('fontSizeLabel').textContent = fontSize;
+    document.body.style.fontSize = fontSize + 'px';
+  }
+
+  // Dark mode (simple)
+  function toggleDark() {
+    const t = document.getElementById('darkToggle');
+    t.classList.toggle('on');
+    if (t.classList.contains('on')) {
+      document.body.style.background = '#0D1B2A';
+      document.body.style.color = '#E0E0E0';
+    } else {
+      document.body.style.background = '#F5FBFF';
+      document.body.style.color = '#1A237E';
+    }
+  }
+</script>
+</body>
+</html>

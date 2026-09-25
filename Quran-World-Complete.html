@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quran World — Complete Mus-haf</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--sky:#eaf4fb;--deep:#0f5c8f;--deep2:#0b4a73;--gold:#c9a227;--ink:#16303f;--ink-soft:#4c6a7a;--card:#fff;--line:#d3e6f2;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Poppins',sans-serif;background:#0b2436;color:var(--ink);}
+#app{max-width:460px;margin:0 auto;min-height:100vh;background:var(--sky);display:flex;flex-direction:column;}
+header{padding:calc(14px + var(--safe-t)) 16px 12px;background:linear-gradient(135deg,var(--deep),var(--deep2));color:#fff;
+  position:sticky;top:0;z-index:5;border-radius:0 0 18px 18px;}
+header h1{margin:0;font-size:17px;font-weight:600;}
+header .sub{font-size:11.5px;color:#cfe8f7;margin-top:2px;}
+.juz-scroll{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line);}
+.juz-btn{flex-shrink:0;background:var(--sky);border:1px solid var(--line);color:var(--deep);font-size:11.5px;font-weight:700;
+  padding:7px 12px;border-radius:20px;font-family:inherit;}
+.juz-btn.active{background:var(--deep);color:#fff;border-color:var(--deep);}
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:14px 12px calc(20px + var(--safe-b));}
+#pageImg{width:100%;max-width:400px;border-radius:10px;box-shadow:0 10px 30px rgba(15,92,143,.25);touch-action:pan-y;user-select:none;}
+.ctrl{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;margin-top:14px;gap:8px;}
+.ctrl button{background:var(--card);border:1px solid var(--line);color:var(--deep);font-weight:700;font-size:13px;
+  padding:9px 16px;border-radius:12px;font-family:inherit;}
+.pageinfo{font-size:12px;color:var(--ink-soft);font-weight:600;text-align:center;}
+.jump{display:flex;gap:6px;margin-top:10px;width:100%;max-width:400px;}
+.jump input{flex:1;padding:9px 12px;border-radius:10px;border:1px solid var(--line);font-family:inherit;font-size:13px;}
+.jump button{background:var(--deep);color:#fff;border:none;padding:9px 14px;border-radius:10px;font-weight:700;font-size:12.5px;}
+.hint{font-size:11px;color:var(--ink-soft);margin-top:8px;text-align:center;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Quran World — Complete Mus-haf</h1>
+    <div class="sub" id="topSub">Page 2 · Juz 1</div>
+  </header>
+  <div class="juz-scroll" id="juzScroll"></div>
+  <main>
+    <img id="pageImg" src="" alt="Quran page" ondragstart="return false;">
+    <div class="ctrl">
+      <button onclick="prevPage()">‹ Prev</button>
+      <div class="pageinfo" id="pageInfo">2 / 555</div>
+      <button onclick="nextPage()">Next ›</button>
+    </div>
+    <div class="jump">
+      <input type="number" id="jumpInput" min="1" max="555" placeholder="Go to page #">
+      <button onclick="jumpTo()">Go</button>
+    </div>
+    <div class="hint">Swipe left / right on the page to turn · 555 pages · 30 Juz</div>
+  </main>
+</div>
+<script src="manifest.js"></script>
+<script>
+let cur=2;
+function pad(n){ return String(n).padStart(3,'0'); }
+function render(){
+  document.getElementById('pageImg').src='pages/p'+pad(cur)+'.jpg';
+  document.getElementById('pageInfo').textContent=cur+' / '+TOTAL_PAGES;
+  const jz=juzForPage(cur);
+  document.getElementById('topSub').textContent='Page '+cur+' · '+jz;
+  document.querySelectorAll('.juz-btn').forEach(b=>b.classList.toggle('active', b.dataset.name===jz));
+  const active=document.querySelector('.juz-btn.active');
+  if(active) active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+}
+function nextPage(){ if(cur<TOTAL_PAGES){ cur++; render(); } }
+function prevPage(){ if(cur>1){ cur--; render(); } }
+function jumpTo(){ const v=parseInt(document.getElementById('jumpInput').value); if(v>=1&&v<=TOTAL_PAGES){ cur=v; render(); } }
+function goJuz(name,startPage){ cur=startPage; render(); }
+function buildJuzBar(){
+  const bar=document.getElementById('juzScroll');
+  juzBounds.forEach(([name,start])=>{
+    const b=document.createElement('button'); b.className='juz-btn'; b.textContent=name.replace('Juz ','J'); b.dataset.name=name;
+    b.onclick=()=>goJuz(name,start);
+    bar.appendChild(b);
+  });
+}
+let sx=0;
+document.getElementById('pageImg').addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; },{passive:true});
+document.getElementById('pageImg').addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-sx;
+  if(Math.abs(dx)>50){ dx<0?nextPage():prevPage(); }
+},{passive:true});
+buildJuzBar(); render();
+</script>
+</body>
+</html>
